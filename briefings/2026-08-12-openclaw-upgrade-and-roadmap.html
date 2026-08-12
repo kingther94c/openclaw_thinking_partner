@@ -1,0 +1,837 @@
+<title>OpenClaw fork sync — 2026.6.9 → 2026.7.1 + roadmap</title>
+<style>
+  :root {
+    --ground: #eef1f3;
+    --surface: #ffffff;
+    --surface-sunk: #e4e9ec;
+    --ink: #101a20;
+    --ink-soft: #465a66;
+    --ink-faint: #6f838e;
+    --rule: #ccd6db;
+    --rule-strong: #a8b8c0;
+    --accent: #0b5563;
+    --accent-soft: #dceaed;
+    --warn: #8f5111;
+    --warn-soft: #f6e8d5;
+    --ok: #2c6140;
+    --ok-soft: #dcebe0;
+    --shadow: 0 1px 2px rgba(16, 26, 32, .07), 0 8px 24px -16px rgba(16, 26, 32, .35);
+
+    --serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+    --sans: "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+    --mono: "Cascadia Mono", "Cascadia Code", Consolas, "SF Mono", "Roboto Mono", monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #0d1418;
+      --surface: #141e24;
+      --surface-sunk: #0a1015;
+      --ink: #e6edf0;
+      --ink-soft: #a3b6bf;
+      --ink-faint: #7b8f99;
+      --rule: #25353d;
+      --rule-strong: #3a4f59;
+      --accent: #5cc0d3;
+      --accent-soft: #10323b;
+      --warn: #e0a463;
+      --warn-soft: #372611;
+      --ok: #74c48d;
+      --ok-soft: #14301d;
+      --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 8px 24px -16px rgba(0, 0, 0, .8);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --ground: #0d1418;
+    --surface: #141e24;
+    --surface-sunk: #0a1015;
+    --ink: #e6edf0;
+    --ink-soft: #a3b6bf;
+    --ink-faint: #7b8f99;
+    --rule: #25353d;
+    --rule-strong: #3a4f59;
+    --accent: #5cc0d3;
+    --accent-soft: #10323b;
+    --warn: #e0a463;
+    --warn-soft: #372611;
+    --ok: #74c48d;
+    --ok-soft: #14301d;
+    --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 8px 24px -16px rgba(0, 0, 0, .8);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0 20px 96px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: 860px; margin: 0 auto; }
+
+  /* ---------- masthead ---------- */
+
+  .masthead {
+    padding: 56px 0 28px;
+    border-bottom: 2px solid var(--ink);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .eyebrow span:not(:last-child)::after {
+    content: "·";
+    margin-left: 10px;
+    color: var(--rule-strong);
+  }
+
+  h1 {
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: clamp(30px, 5vw, 44px);
+    line-height: 1.12;
+    letter-spacing: -.012em;
+    margin: 0;
+    text-wrap: balance;
+  }
+
+  .standfirst {
+    font-size: 18px;
+    line-height: 1.55;
+    color: var(--ink-soft);
+    margin: 0;
+    max-width: 62ch;
+    text-wrap: pretty;
+  }
+
+  /* ---------- transition strip ---------- */
+
+  .strip {
+    margin: 28px 0 0;
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    box-shadow: var(--shadow);
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  }
+
+  .cell {
+    padding: 18px 20px;
+    border-right: 1px solid var(--rule);
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .cell:last-child { border-right: none; }
+
+  .cell-label {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: .13em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+
+  .cell-value {
+    font-family: var(--mono);
+    font-size: 19px;
+    font-weight: 600;
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+    line-height: 1.25;
+  }
+
+  .cell-value.is-accent { color: var(--accent); }
+  .cell-value.is-ok { color: var(--ok); }
+  .cell-note { font-size: 12.5px; color: var(--ink-faint); line-height: 1.4; }
+
+  /* ---------- sections ---------- */
+
+  section { margin-top: 52px; }
+
+  h2 {
+    font-family: var(--serif);
+    font-size: 25px;
+    font-weight: 600;
+    letter-spacing: -.008em;
+    margin: 0 0 6px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--rule-strong);
+    text-wrap: balance;
+  }
+
+  .section-note {
+    font-size: 13.5px;
+    color: var(--ink-faint);
+    margin: 0 0 22px;
+    font-family: var(--mono);
+  }
+
+  p { max-width: 68ch; margin: 0 0 16px; text-wrap: pretty; }
+  p:last-child { margin-bottom: 0; }
+
+  code {
+    font-family: var(--mono);
+    font-size: .88em;
+    background: var(--surface-sunk);
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    padding: .08em .34em;
+    color: var(--ink);
+    overflow-wrap: break-word;
+  }
+
+  strong { font-weight: 650; color: var(--ink); }
+
+  /* ---------- tables ---------- */
+
+  .table-scroll {
+    overflow-x: auto;
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    background: var(--surface);
+    box-shadow: var(--shadow);
+  }
+
+  table { border-collapse: collapse; width: 100%; font-size: 14px; }
+
+  th {
+    text-align: left;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    font-weight: 600;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--rule-strong);
+    white-space: nowrap;
+    background: var(--surface-sunk);
+  }
+
+  td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--rule);
+    vertical-align: top;
+    line-height: 1.5;
+  }
+
+  tbody tr:last-child td { border-bottom: none; }
+  td.mono { font-family: var(--mono); font-size: 12.5px; white-space: nowrap; }
+
+  /* ---------- status pills ---------- */
+
+  .pill {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    padding: 2.5px 8px;
+    border-radius: 2px;
+    white-space: nowrap;
+    font-weight: 600;
+  }
+
+  .pill-ok { background: var(--ok-soft); color: var(--ok); }
+  .pill-warn { background: var(--warn-soft); color: var(--warn); }
+  .pill-accent { background: var(--accent-soft); color: var(--accent); }
+
+  /* ---------- the seam comparison ---------- */
+
+  .seam {
+    display: grid;
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+
+  .seam-row {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    box-shadow: var(--shadow);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  @media (min-width: 720px) {
+    .seam-row { grid-template-columns: 200px minmax(0, 1fr) minmax(0, 1fr); }
+  }
+
+  .seam-want {
+    padding: 16px 18px;
+    font-weight: 600;
+    font-size: 14.5px;
+    border-bottom: 1px solid var(--rule);
+    background: var(--surface-sunk);
+  }
+
+  .seam-cell {
+    padding: 16px 18px;
+    font-size: 13.5px;
+    line-height: 1.55;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .seam-cell:last-child { border-bottom: none; }
+
+  @media (min-width: 720px) {
+    .seam-want { border-bottom: none; border-right: 1px solid var(--rule); }
+    .seam-cell { border-bottom: none; border-right: 1px solid var(--rule); }
+    .seam-cell:last-child { border-right: none; }
+  }
+
+  .seam-tag {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 6px;
+  }
+
+  .seam-today .seam-tag { color: var(--warn); }
+  .seam-next .seam-tag { color: var(--accent); }
+  .seam-today { border-left: 3px solid var(--warn); }
+  .seam-next { border-left: 3px solid var(--accent); }
+
+  @media (min-width: 720px) {
+    .seam-today, .seam-next { border-left: none; }
+    .seam-today { box-shadow: inset 3px 0 0 var(--warn); }
+    .seam-next { box-shadow: inset 3px 0 0 var(--accent); }
+  }
+
+  /* ---------- proposals ---------- */
+
+  .proposal {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    box-shadow: var(--shadow);
+    padding: 26px 28px;
+    margin-bottom: 22px;
+  }
+
+  .proposal-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+
+  .proposal-num {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .1em;
+    color: var(--accent);
+  }
+
+  h3 {
+    font-family: var(--serif);
+    font-size: 21px;
+    font-weight: 600;
+    margin: 0;
+    flex: 1 1 260px;
+    line-height: 1.25;
+    text-wrap: balance;
+  }
+
+  .thesis {
+    font-size: 15.5px;
+    color: var(--ink-soft);
+    border-left: 2px solid var(--accent);
+    padding-left: 14px;
+    margin: 0 0 20px;
+    max-width: 66ch;
+  }
+
+  .block-label {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: .13em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: 20px 0 8px;
+  }
+
+  ul.evidence { margin: 0; padding: 0; list-style: none; display: grid; gap: 9px; }
+
+  ul.evidence li {
+    font-size: 13.5px;
+    line-height: 1.55;
+    padding-left: 16px;
+    position: relative;
+    color: var(--ink-soft);
+    max-width: 72ch;
+  }
+
+  ul.evidence li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: .62em;
+    width: 6px;
+    height: 1px;
+    background: var(--rule-strong);
+  }
+
+  ul.evidence li .src {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--ink-faint);
+    display: block;
+    margin-top: 2px;
+  }
+
+  .repo-tag {
+    font-family: var(--mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--accent);
+    border: 1px solid var(--rule-strong);
+    border-radius: 2px;
+    padding: 0 4px;
+    margin-right: 5px;
+  }
+
+  .meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid var(--rule);
+  }
+
+  pre {
+    font-family: var(--mono);
+    font-size: 12.5px;
+    line-height: 1.65;
+    background: var(--surface-sunk);
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    padding: 14px 16px;
+    overflow-x: auto;
+    margin: 0 0 16px;
+    color: var(--ink);
+  }
+
+  pre code { background: none; border: none; padding: 0; font-size: inherit; }
+  .comment { color: var(--ink-faint); }
+
+  footer {
+    margin-top: 56px;
+    padding-top: 20px;
+    border-top: 1px solid var(--rule);
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--ink-faint);
+    line-height: 1.7;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+</style>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <div class="eyebrow">
+      <span>Fork sync briefing</span>
+      <span>2026-08-12</span>
+      <span>openclaw_thinking_partner</span>
+    </div>
+    <h1>Upgraded to the 2026.7.1 stable line, with our kit intact</h1>
+    <p class="standfirst">
+      The fork moved 4,716 commits forward with zero conflicts. Below: what the upgrade
+      actually changed for our consumers, and three developments drawn from how the
+      sibling projects really use this gateway.
+    </p>
+  </header>
+
+  <div class="strip">
+    <div class="cell">
+      <div class="cell-label">Base was</div>
+      <div class="cell-value">v2026.6.9</div>
+      <div class="cell-note">cut 2026-06-21</div>
+    </div>
+    <div class="cell">
+      <div class="cell-label">Base now</div>
+      <div class="cell-value is-accent">v2026.7.1-2</div>
+      <div class="cell-note">current stable channel</div>
+    </div>
+    <div class="cell">
+      <div class="cell-label">Commits gained</div>
+      <div class="cell-value">4,716</div>
+      <div class="cell-note">9,984 files touched</div>
+    </div>
+    <div class="cell">
+      <div class="cell-label">Conflicts</div>
+      <div class="cell-value is-ok">0</div>
+      <div class="cell-note">our commit byte-identical</div>
+    </div>
+  </div>
+
+  <section>
+    <h2>What happened to our changes</h2>
+    <p class="section-note">git rebase --onto v2026.7.1-2 v2026.6.9</p>
+
+    <p>
+      Our fork carries exactly <strong>one</strong> commit on top of upstream — the
+      docs-only <code>integration-kit/</code> (5 files, 296 lines). That is why this
+      upgrade was cheap: there is no forked source code to reconcile, so the rebase
+      replayed a single commit onto a directory name upstream does not use.
+    </p>
+    <p>
+      Verified after the rebase: <code>git diff</code> between the old and new commit
+      across <code>integration-kit/</code> is empty — the five files are byte-identical,
+      not merely "merged cleanly".
+    </p>
+
+    <div class="block-label">Why this tag, and not the alternatives</div>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr><th>Candidate</th><th>What it is</th><th>Verdict</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="mono">v2026.7.1-2</td>
+            <td>Tip of the 2026.7.1 stable line; strict superset of <code>v2026.7.1</code> and <code>-1</code>. The appcast's published stable is 2026.7.1.</td>
+            <td><span class="pill pill-ok">Chosen</span></td>
+          </tr>
+          <tr>
+            <td class="mono">v2026.6.34</td>
+            <td>Tagged "extended-stable" — the long-running 6.x maintenance line. Newer by date (2026-08-04) but an older feature series.</td>
+            <td><span class="pill pill-warn">LTS branch</span></td>
+          </tr>
+          <tr>
+            <td class="mono">upstream/main</td>
+            <td>Version 2026.8.1, unreleased. Changelog top section is still "Unreleased".</td>
+            <td><span class="pill pill-warn">Bleeding edge</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="block-label">Contract re-verification</div>
+    <p>
+      Our integration kit publishes an API contract to external consumers, so a
+      4,716-commit jump is a chance to silently invalidate our own documentation. Each
+      documented claim was re-checked against the new tree:
+    </p>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr><th>Documented claim</th><th>Status in 2026.7.1</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>POST /v1/chat/completions</code>, <code>GET /v1/models</code> on <code>127.0.0.1:18789</code></td><td><span class="pill pill-ok">Holds</span></td></tr>
+          <tr><td><code>x-openclaw-session-key</code> header for server-side memory</td><td><span class="pill pill-ok">Holds</span></td></tr>
+          <tr><td>Agent-first model ids <code>openclaw/&lt;agentId&gt;</code></td><td><span class="pill pill-ok">Holds</span> — <code>openclaw:&lt;agentId&gt;</code> now also accepted</td></tr>
+          <tr><td>Bearer token from <code>gateway.auth.token</code> / <code>OPENCLAW_GATEWAY_TOKEN</code></td><td><span class="pill pill-ok">Holds</span></td></tr>
+          <tr><td>Skill delivery is not observable over HTTP</td><td><span class="pill pill-warn">Still true</span> — see proposal 2</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="block-label">New upstream capability worth knowing</div>
+    <p>
+      The jump brings a <strong>Skill Workshop lifecycle curator</strong> and a
+      <code>/learn</code> command that drafts skills from recent work. Relevant to us
+      because <code>market_helper</code> deploys machine-generated skills: the curator
+      only touches skills created through Workshop proposals, so our generated
+      <code>mh-*</code> files are <em>not</em> subject to auto-archiving. The real hazard is
+      the reverse — if anyone uses <code>/learn</code> or Workshop to edit an
+      <code>mh-*</code> skill, the next exporter run silently overwrites it.
+    </p>
+  </section>
+
+  <section>
+    <h2>One root cause behind all three proposals</h2>
+    <p class="section-note">the capability exists inside; the sanctioned path cannot reach it</p>
+
+    <p>
+      Reading how <code>market_helper</code> actually integrates surfaced a consistent
+      pattern. Every capability the consumer needs <strong>already exists</strong> inside the
+      gateway — but only behind the CLI or the operator RPC surface. Our own
+      <code>integration-kit/boundaries.md</code> tells consumers to use the HTTP API and
+      never touch <code>~/.openclaw</code>. Since the sanctioned path cannot reach these
+      capabilities, the consumer reaches around it instead — and our stated boundary
+      is, today, aspirational rather than real.
+    </p>
+
+    <div class="seam">
+      <div class="seam-row">
+        <div class="seam-want">Get the auth token</div>
+        <div class="seam-cell seam-today">
+          <span class="seam-tag">Today — reaches around</span>
+          Consumer parses <code>~/.openclaw/openclaw.json</code> for <code>gateway.auth.token</code>.
+        </div>
+        <div class="seam-cell seam-next">
+          <span class="seam-tag">Proposal 1</span>
+          A provisioning path that issues a scoped consumer token.
+        </div>
+      </div>
+      <div class="seam-row">
+        <div class="seam-want">Install + scope a skill</div>
+        <div class="seam-cell seam-today">
+          <span class="seam-tag">Today — reaches around</span>
+          Consumer copies dirs into <code>~/.openclaw/skills</code>; allowlists hand-edited in config.
+        </div>
+        <div class="seam-cell seam-next">
+          <span class="seam-tag">Proposal 1</span>
+          <code>skills.load.extraDirs</code> + a supported allowlist mutation.
+        </div>
+      </div>
+      <div class="seam-row">
+        <div class="seam-want">Prove a skill was delivered</div>
+        <div class="seam-cell seam-today">
+          <span class="seam-tag">Today — reaches around</span>
+          Consumer asks the model to quote a secret marker and greps the reply.
+        </div>
+        <div class="seam-cell seam-next">
+          <span class="seam-tag">Proposal 2</span>
+          <code>skills.resolved</code> returning names + body digests.
+        </div>
+      </div>
+      <div class="seam-row">
+        <div class="seam-want">Know the quota headroom</div>
+        <div class="seam-cell seam-today">
+          <span class="seam-tag">Today — reaches around</span>
+          Not machine-readable at all. Our runbook says "check quota with the owner".
+        </div>
+        <div class="seam-cell seam-next">
+          <span class="seam-tag">Proposal 3</span>
+          Bridge the existing <code>usage.status</code> to the consumer surface.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Three developments</h2>
+    <p class="section-note">ordered by how much reach-around each one removes</p>
+
+    <article class="proposal">
+      <div class="proposal-head">
+        <span class="proposal-num">01</span>
+        <h3>A real consumer provisioning path</h3>
+      </div>
+      <p class="thesis">
+        Make our stated boundary enforceable by giving consumers a supported way to do
+        the three things they currently do by editing the provider's files.
+      </p>
+
+      <div class="block-label">Evidence</div>
+      <ul class="evidence">
+        <li>
+          Our kit forbids exactly what the consumer must do: "Do not modify this repo,
+          the <code>~/.openclaw</code> config, agents, or <code>SOUL.md</code> from your project."
+          <span class="src">integration-kit/boundaries.md</span>
+        </li>
+        <li>
+          The consumer reads the provider's config file to recover the bearer token,
+          with a fallback chain ending in <code>_openclaw_config_token()</code>.
+          <span class="src"><span class="repo-tag">market_helper</span>trade_advisor/ai/gateway.py:104</span>
+        </li>
+        <li>
+          A deploy script <code>copytree</code>s <code>mh-*</code> skill dirs into the managed
+          <code>~/.openclaw/skills</code>, then prints that allowlists must be set by hand
+          in <code>~/.openclaw/openclaw.json</code>.
+          <span class="src"><span class="repo-tag">market_helper</span>scripts/dev/deploy_openclaw_skills.py</span>
+        </li>
+        <li>
+          The agent→skill map is a hand-maintained mirror of the provider's allowlist —
+          two sources of truth that can drift with no guard.
+          <span class="src"><span class="repo-tag">market_helper</span>trade_advisor/ai/skill_export.py:106</span>
+        </li>
+      </ul>
+
+      <div class="block-label">Proposal</div>
+      <p>
+        Two of these are already solvable with shipped upstream features that our kit
+        never mentions. <code>skills.load.extraDirs</code> can point straight at the
+        consumer's version-controlled skill dir, which deletes the copy step and the
+        whole deploy script. <code>openclaw skills install ./path --agent &lt;id&gt;</code>
+        already scopes a skill to an agent. Document both in the kit as the supported
+        path, then close the genuine remaining gap: allowlist mutation and token
+        issuance still have no answer other than editing config by hand.
+      </p>
+
+      <div class="meta-row">
+        <span class="pill pill-ok">Quick win available now</span>
+        <span class="pill pill-accent">Mostly docs + config</span>
+        <span class="pill pill-accent">Removes 1 script entirely</span>
+      </div>
+    </article>
+
+    <article class="proposal">
+      <div class="proposal-head">
+        <span class="proposal-num">02</span>
+        <h3>A <code>skills.resolved</code> method, so delivery is provable</h3>
+      </div>
+      <p class="thesis">
+        Replace a flaky model-probe with a deterministic answer to "which skills does
+        this agent actually carry right now?"
+      </p>
+
+      <div class="block-label">Evidence</div>
+      <ul class="evidence">
+        <li>
+          To prove skills reach the model, the consumer asks each agent to quote an
+          unguessable marker verbatim and greps the reply. Its own docstring concedes
+          it is a "best-effort smoke tool, NOT a CI gate", is "run-to-run flaky", and
+          that a negative result "is inconclusive".
+          <span class="src"><span class="repo-tag">market_helper</span>scripts/dev/verify_openclaw_skills.py</span>
+        </li>
+        <li>
+          The resolution logic already exists — it is simply CLI-only:
+          <code>skills list --agent &lt;id&gt; --json</code>, <code>skills check --agent &lt;id&gt;</code>,
+          <code>skills info &lt;name&gt; --agent &lt;id&gt;</code>.
+          <span class="src">docs/cli/skills.md:54,57,59</span>
+        </li>
+        <li>
+          The gateway already exposes a scoped <code>skills.*</code> RPC namespace
+          (<code>skills.curator.status</code> at <code>operator.read</code>, proposals at
+          <code>operator.admin</code>) — but nothing returns per-agent resolved skills.
+          <span class="src">docs/tools/skill-workshop.md:273</span>
+        </li>
+        <li>
+          A sibling project shows the cost of not having digests: its generated skill
+          mirror "drifted twice" before a comparison guard was added.
+          <span class="src"><span class="repo-tag">RE_search</span>tools/sync_agents_skills.py</span>
+        </li>
+      </ul>
+
+      <div class="block-label">Proposal</div>
+      <p>
+        Add <code>skills.resolved</code> at <code>operator.read</code>, returning each agent's
+        resolved skill names plus a content digest per skill body. This is additive
+        into an existing namespace at an existing scope, reusing the resolver the CLI
+        already calls — not a new subsystem. It converts the probe script into a real
+        CI gate, and it proves <em>isolation</em> too (an agent must not carry skills
+        outside its allowlist). The digest is a bonus: it lets any consumer that
+        generates skills verify the deployed body matches what it generated, which is
+        the drift guard two of our projects each built by hand.
+      </p>
+
+      <div class="meta-row">
+        <span class="pill pill-accent">Additive, existing namespace</span>
+        <span class="pill pill-accent">Small surface</span>
+        <span class="pill pill-ok">Turns a flaky probe into a gate</span>
+      </div>
+    </article>
+
+    <article class="proposal">
+      <div class="proposal-head">
+        <span class="proposal-num">03</span>
+        <h3>Quota headroom on the consumer surface</h3>
+      </div>
+      <p class="thesis">
+        The gateway already knows the remaining quota. The consumers that need it most
+        are the only ones forbidden to ask.
+      </p>
+
+      <div class="block-label">Evidence</div>
+      <ul class="evidence">
+        <li>
+          <code>usage.status</code> "returns provider usage windows/remaining quota
+          summaries" and is already scoped at <code>operator.read</code>.
+          <span class="src">docs/gateway/protocol.md:347 · src/gateway/methods/core-descriptors.ts:38</span>
+        </li>
+        <li>
+          But our kit tells consumers not to depend on gateway server-methods, so the
+          sanctioned path cannot see it. Quota coordination is left as a human protocol:
+          "check quota with the owner", "coordinate with the owner rather than retrying
+          in a loop".
+          <span class="src">integration-kit/operations.md · boundaries.md</span>
+        </li>
+        <li>
+          This shifts from theory to pressure as projects multiply: three dashboard
+          panes already route to three separate agents, with no client-side caching of
+          advisories on the call path.
+          <span class="src"><span class="repo-tag">market_helper</span>dashboard/pages/trade_advisor/modules/{tactical,option,fx_hedge}.py</span>
+        </li>
+        <li>
+          All of it lands on one personal ChatGPT subscription with rolling limits — a
+          constraint our own boundaries doc flags but gives no mechanism to respect.
+          <span class="src">integration-kit/boundaries.md — "Quota &amp; rate"</span>
+        </li>
+      </ul>
+
+      <div class="block-label">Proposal</div>
+      <p>
+        Expose read-only headroom on the path consumers are actually allowed to use, so
+        a client can self-throttle or degrade deterministically instead of discovering
+        the limit as a refusal. The cheapest honest version is a documented, token-gated
+        read that mirrors <code>usage.status</code> — the work is the exposure decision and
+        the contract, not new accounting. Pair it with a note in the kit on caching by
+        input hash, which the boundaries doc already recommends and no consumer
+        currently implements on the advisor call path.
+      </p>
+
+      <div class="meta-row">
+        <span class="pill pill-accent">Data already exists</span>
+        <span class="pill pill-warn">Needs a scope decision</span>
+        <span class="pill pill-accent">Scales to 5 sibling projects</span>
+      </div>
+    </article>
+  </section>
+
+  <section>
+    <h2>Where things stand</h2>
+    <p class="section-note">branch: claude/openclaw-update-suggestions-32d432</p>
+
+    <p>
+      The rebase is done and committed; the branch is new on the remote, so it pushes
+      without a force. Nothing was built or test-run: the tree is an official upstream
+      release tag plus five markdown files, so there is no fork-specific code for a
+      build to exercise that upstream's own release validation did not already cover.
+    </p>
+
+    <pre><code><span class="comment"># confirm the base and that our commit is the only one on top</span>
+git log --oneline HEAD ^v2026.7.1-2
+
+<span class="comment"># confirm our kit survived byte-for-byte (empty output = identical)</span>
+git diff 0c6a7757e2 HEAD -- integration-kit/</code></pre>
+
+    <p>
+      Recommended order if the proposals land: <strong>1 before 2</strong> — provisioning
+      first, because <code>skills.resolved</code> is most valuable once skills arrive
+      through a supported path rather than a hand-copied one. Proposal 3 is independent
+      and can go whenever the scope question is settled.
+    </p>
+  </section>
+
+  <footer>
+    openclaw_thinking_partner · fork sync briefing · 2026-08-12<br>
+    Base v2026.6.9 → v2026.7.1-2 · 4,716 commits · 0 conflicts · integration-kit unchanged<br>
+    Evidence cited from this repo, market_helper, and RE_search. No credentials appear in this document.
+  </footer>
+
+</div>
