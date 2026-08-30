@@ -398,11 +398,20 @@ describe("Crestodian rescue message", () => {
     await withRescueStateDir("agent-", async (tempDir) => {
       const cfg: OpenClawConfig = { crestodian: { rescue: { enabled: true } } };
       const deps = { runAgentsAdd: vi.fn(async () => {}) };
+      // The plan message echoes the workspace after resolveUserPath, which is
+      // path.resolve for non-"~" input. A bare POSIX path is not absolute on
+      // Windows, so pin the host-resolved form instead of a literal.
+      const workspace = path.resolve("/tmp/work");
 
       await expect(
-        runRescue("/crestodian create agent work workspace /tmp/work", cfg, commandContext(), deps),
+        runRescue(
+          `/crestodian create agent work workspace ${workspace}`,
+          cfg,
+          commandContext(),
+          deps,
+        ),
       ).resolves.toBe(
-        "Plan: create agent work with workspace /tmp/work. Reply /crestodian yes to apply.",
+        `Plan: create agent work with workspace ${workspace}. Reply /crestodian yes to apply.`,
       );
       await expect(runRescue("/crestodian yes", cfg, commandContext(), deps)).resolves.toContain(
         "[crestodian] done: agents.create",
@@ -419,7 +428,7 @@ describe("Crestodian rescue message", () => {
       ];
       expect(agentParams).toEqual({
         name: "work",
-        workspace: "/tmp/work",
+        workspace,
         nonInteractive: true,
       });
       expect(agentRuntime).toBeTypeOf("object");
@@ -440,7 +449,7 @@ describe("Crestodian rescue message", () => {
       expect(audit.details?.channel).toBe("whatsapp");
       expect(audit.details?.senderId).toBe("user:owner");
       expect(audit.details?.agentId).toBe("work");
-      expect(audit.details?.workspace).toBe("/tmp/work");
+      expect(audit.details?.workspace).toBe(workspace);
     });
   });
 });
