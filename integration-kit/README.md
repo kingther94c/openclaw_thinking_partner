@@ -18,6 +18,10 @@ as a standard **OpenAI-compatible** HTTP endpoint — nothing more.
 3. **`boundaries.md`** — what you may depend on, what you must NOT, security + quota limits. **Read before building.**
 4. **`operations.md`** — confirming the gateway is up, health checks, troubleshooting.
 
+Optional: **`responses-facade/README.md`** — an OpenAI **Responses API**
+(`POST /v1/responses`) front door on port 18790, if your client speaks that
+instead of chat-completions. Same agents, same answers.
+
 ## 60-second quickstart
 
 - Endpoint: `POST http://127.0.0.1:18789/v1/chat/completions` (OpenAI-compatible).
