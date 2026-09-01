@@ -14,6 +14,8 @@ const targets = [
   "examples",
   "scripts",
   "tools",
+  // Fork-local: consumer integration kit ships a runnable Responses API facade.
+  "integration-kit",
   "packages",
   "ui",
   "apps",
