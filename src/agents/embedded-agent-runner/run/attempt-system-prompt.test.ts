@@ -364,6 +364,30 @@ describe("buildAttemptSystemPrompt", () => {
     expect(await refreshSystemPrompt("", [read])).toBe("");
   });
 
+  it("renders an agent's configured promptMode unless the run sets one", async () => {
+    const pinned = { agents: { entries: { main: { promptMode: "minimal" as const } } } };
+    const render = async (attemptOverrides: Partial<EmbeddedRunAttemptParams>) =>
+      (
+        await preparePermissionPrompt(
+          false,
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          attemptOverrides,
+        )
+      ).prepared.systemPromptText;
+
+    const runtimeDefault = await render({ promptMode: undefined });
+    const configured = await render({ promptMode: undefined, config: pinned });
+    const runOverride = await render({ promptMode: "full", config: pinned });
+
+    expect(runtimeDefault).toContain("## Assistant Output Directives");
+    expect(configured).not.toContain("## Assistant Output Directives");
+    expect(runOverride).toContain("## Assistant Output Directives");
+  });
+
   it("does not invoke ambient contributors during settled finalization", async () => {
     const getProviderRuntimeHandle = vi.fn();
     const markStage = vi.fn();

@@ -17,6 +17,7 @@ import {
   buildAfterTurnRuntimeContext,
   buildAfterTurnRuntimeContextFromUsage,
   mergeOrphanedTrailingUserPrompt,
+  resolveConfiguredPromptMode,
   resolvePromptBuildHookResult,
 } from "./attempt-prompt-helpers.js";
 import { resolvePromptSubmissionSkipReason } from "./attempt-prompt-submit.js";
@@ -255,5 +256,21 @@ describe("buildAfterTurnRuntimeContext", () => {
 
     expect(legacy.currentTokenCount).toBe(23);
     expect(legacy.promptCache?.lastCallUsage?.total).toBe(57);
+  });
+});
+
+describe("resolveConfiguredPromptMode", () => {
+  const config = {
+    agents: { entries: { api: { promptMode: "minimal" }, chat: {} } },
+  } as OpenClawConfig;
+
+  it("returns the operator-pinned prompt mode for the agent", () => {
+    expect(resolveConfiguredPromptMode({ config, agentId: "api" })).toBe("minimal");
+  });
+
+  it("returns undefined without a pin, config, or agent id", () => {
+    expect(resolveConfiguredPromptMode({ config, agentId: "chat" })).toBeUndefined();
+    expect(resolveConfiguredPromptMode({ config: undefined, agentId: "api" })).toBeUndefined();
+    expect(resolveConfiguredPromptMode({ config, agentId: undefined })).toBeUndefined();
   });
 });

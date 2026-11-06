@@ -141,7 +141,7 @@ On channels with native approval cards/buttons, the prompt tells the agent to re
 
 ## Prompt modes
 
-OpenClaw renders smaller system prompts for sub-agents. The runtime sets a `promptMode` per run (not user-facing config):
+OpenClaw renders smaller system prompts for sub-agents. The runtime sets a `promptMode` per run; operators can pin `full` or `minimal` for one agent with `agents.entries.*.promptMode` (see [Per-agent prompt mode](/gateway/config-agents/workspace-and-bootstrap#per-agent-prompt-mode)):
 
 - `full` (default): all sections above.
 - `minimal`: used for sub-agents; omits the memory prompt section (bundled as **Memory Recall**), **Model Aliases**, **User Identity**, **Assistant Output Directives**, **Messaging**, **Collapsible Details**, and **Silent Replies**. Tooling, **Care**, **Skills** (when supplied), Workspace, Sandbox, Runtime, and injected context stay available. The current date and time zone still arrive through turn context.

@@ -98,6 +98,9 @@ export const AgentEntryBaseSchema = z.strictObject({
   contextInjection: z
     .union([z.literal("always"), z.literal("continuation-skip"), z.literal("never")])
     .optional(),
+  // Per-agent system prompt mode pin. `none` stays runtime-only because it also
+  // drops client tools and caller system prompts, which config must not do silently.
+  promptMode: z.union([z.literal("full"), z.literal("minimal")]).optional(),
   bootstrapMaxChars: z.number().int().positive().optional(),
   bootstrapTotalMaxChars: z.number().int().positive().optional(),
   experimental: z

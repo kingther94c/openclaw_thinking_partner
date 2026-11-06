@@ -42,6 +42,15 @@ describe("agent defaults schema", () => {
     }
   });
 
+  it("accepts per-agent promptMode full/minimal and rejects the runtime-only none", () => {
+    expect(AgentEntrySchema.parse({ id: "api", promptMode: "minimal" }).promptMode).toBe("minimal");
+    expect(AgentEntrySchema.parse({ id: "api", promptMode: "full" }).promptMode).toBe("full");
+    expectSchemaFailurePath(
+      AgentEntrySchema.safeParse({ id: "api", promptMode: "none" }),
+      "promptMode",
+    );
+  });
+
   it("preserves separate run directories through config validation and list projection", () => {
     const result = validateConfigObject({
       agents: {

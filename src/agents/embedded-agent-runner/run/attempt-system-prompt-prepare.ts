@@ -34,7 +34,10 @@ import { buildToolSchemaDirectoryPrompt } from "../../tool-search.js";
 import { prepareWatchedSessionsPromptAsync } from "../../watched-sessions-prompt.js";
 import { buildEmbeddedSandboxInfo, resolveEmbeddedSandboxInfoExecPolicy } from "../sandbox-info.js";
 import type { prepareEmbeddedAttemptBootstrap } from "./attempt-bootstrap-prepare.js";
-import { resolvePromptModeForSession } from "./attempt-prompt-helpers.js";
+import {
+  resolveConfiguredPromptMode,
+  resolvePromptModeForSession,
+} from "./attempt-prompt-helpers.js";
 import type { EmbeddedAttemptSetup } from "./attempt-setup.js";
 import { buildAttemptSystemPrompt, type SystemPromptRefresh } from "./attempt-system-prompt.js";
 import { resolveSessionPromptDelivery } from "./turn-delivery-context.js";
@@ -194,9 +197,16 @@ export async function prepareEmbeddedAttemptSystemPrompt(params: {
       requesterProfileId: readAdmittedRunOperatorAuthority(attempt.admittedRunContext)?.profileId,
     },
   );
+  // agents.entries.<id>.promptMode pins the prompt shape for API-style agents.
+  // Explicit run params and raw model runs still win.
   const promptMode =
     attempt.promptMode ??
-    (params.isRawModelRun ? "none" : resolvePromptModeForSession(attempt.sessionKey));
+    (params.isRawModelRun
+      ? "none"
+      : (resolveConfiguredPromptMode({
+          config: attempt.config,
+          agentId: params.setup.sessionAgentId,
+        }) ?? resolvePromptModeForSession(attempt.sessionKey)));
   const promptSurface = resolveAgentPromptSurfaceForSessionKey(attempt.sessionKey);
   const toolPolicyRestricted = toolPolicyRestrictsTools({ allow: attempt.toolsAllow });
   const effectivePromptMode = toolPolicyRestricted ? ("minimal" as const) : promptMode;

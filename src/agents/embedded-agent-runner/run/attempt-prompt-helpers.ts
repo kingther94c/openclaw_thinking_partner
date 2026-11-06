@@ -16,6 +16,7 @@ import {
 } from "../../../sessions/input-provenance.js";
 import { joinPresentTextSegments } from "../../../shared/text/join-segments.js";
 import { truncateUtf16Safe } from "../../../utils.js";
+import { resolveAgentConfig } from "../../agent-scope-config.js";
 import { listActiveProcessSessionReferences } from "../../bash-process-references.js";
 import { resolveProcessToolScopeKey } from "../../bash-process-scope.js";
 import { wrapPluginSystemContextSection } from "../../hook-system-context-boundary.js";
@@ -120,6 +121,22 @@ export async function resolvePromptBuildHookResult(params: {
 
 export function resolvePromptModeForSession(sessionKey?: string): "minimal" | "full" {
   return isSubagentSessionKey(sessionKey) || isCronSessionKey(sessionKey) ? "minimal" : "full";
+}
+
+/**
+ * Operator-pinned prompt mode from `agents.entries.<id>.promptMode`. Only `full` and
+ * `minimal` are configurable: `none` is a runtime-only raw-model mode that also
+ * drops client tools and caller system prompts, which config must not do silently.
+ */
+export function resolveConfiguredPromptMode(params: {
+  config?: OpenClawConfig;
+  agentId?: string;
+}): "minimal" | "full" | undefined {
+  if (!params.config || !params.agentId) {
+    return undefined;
+  }
+  const mode = resolveAgentConfig(params.config, params.agentId)?.promptMode;
+  return mode === "full" || mode === "minimal" ? mode : undefined;
 }
 
 /** User-visible runs warn when transcript repair had to merge an orphaned user turn. */

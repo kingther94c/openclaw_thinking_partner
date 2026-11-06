@@ -90,6 +90,7 @@ export const FIELD_LABELS: Record<string, string> = {
   "agents.entries.*.fastModeDefault": "Agent Fast Mode Default",
   "agents.defaults.fastModeDefault": "Default Agent Fast Mode",
   "agents.entries.*.contextInjection": "Agent Context Injection",
+  "agents.entries.*.promptMode": "Agent Prompt Mode",
   "agents.entries.*.bootstrapMaxChars": "Agent Bootstrap Max Chars",
   "agents.entries.*.bootstrapTotalMaxChars": "Agent Bootstrap Total Max Chars",
   "agents.entries.*.experimental": "Agent Experimental Flags",

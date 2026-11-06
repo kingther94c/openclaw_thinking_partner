@@ -87,6 +87,7 @@ export type ResolvedAgentConfig = {
   reasoningDefault?: AgentEntry["reasoningDefault"];
   fastModeDefault?: AgentEntry["fastModeDefault"];
   contextInjection?: AgentEntry["contextInjection"];
+  promptMode?: AgentEntry["promptMode"];
   bootstrapMaxChars?: AgentEntry["bootstrapMaxChars"];
   bootstrapTotalMaxChars?: AgentEntry["bootstrapTotalMaxChars"];
   experimental?: AgentDefaultsConfig["experimental"];
@@ -419,6 +420,7 @@ export function resolveAgentConfig(
     reasoningDefault: entry.reasoningDefault,
     fastModeDefault: entry.fastModeDefault ?? agentDefaults?.fastModeDefault,
     contextInjection: entry.contextInjection,
+    promptMode: entry.promptMode,
     bootstrapMaxChars: entry.bootstrapMaxChars,
     bootstrapTotalMaxChars: entry.bootstrapTotalMaxChars,
     experimental:

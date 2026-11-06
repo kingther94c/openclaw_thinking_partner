@@ -147,6 +147,28 @@ Max total characters injected across all workspace bootstrap files. Default: `60
 Per-agent override: `agents.entries.*.bootstrapTotalMaxChars`. Omitted values
 inherit `agents.defaults.bootstrapTotalMaxChars`.
 
+## Per-agent prompt mode
+
+`agents.entries.*.promptMode` pins the system prompt mode for one agent.
+Default: chosen by the runtime (`"full"` for normal runs, `"minimal"` for
+sub-agent and cron sessions; see
+[Prompt modes](/concepts/system-prompt#prompt-modes)).
+
+- `"minimal"`: renders the sub-agent prompt for API-style agents (for example an
+  OpenAI-compatible endpoint that only relays caller tools), dropping the
+  messaging, output-directive, silent-reply, Control UI, docs, and memory
+  sections. Caller system prompts and client tools still apply.
+- `"full"`: forces the full prompt even for sub-agent and cron sessions.
+
+`"none"` is not configurable: the runtime uses it only for raw model probes
+because it also drops tools and caller system prompts.
+
+```json5
+{
+  agents: { entries: { api: { promptMode: "minimal" } } },
+}
+```
+
 ## Per-agent bootstrap profile overrides
 
 Use per-agent bootstrap profile overrides when one agent needs different prompt
@@ -201,6 +223,7 @@ Matching per-agent overrides:
 - `agents.entries.*.bootstrapMaxChars`
 - `agents.entries.*.bootstrapTotalMaxChars`
 - `agents.entries.*.contextLimits.*`
+- `agents.entries.*.promptMode`
 
 ### `agents.defaults.startupContext`
 
