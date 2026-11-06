@@ -752,7 +752,9 @@ describe("OpenClaw rescue message", () => {
             deps,
           ),
         ).resolves.toBe(
-          `Plan: create agent work with workspace /tmp/work${name ? `, name: ${JSON.stringify(name)}` : ""}${purpose ? `, purpose: ${JSON.stringify(purpose)}` : ""}${role ? ", role: Writer" : ""}. Reply /openclaw yes to apply.`,
+          // The plan echoes the workspace after resolveUserPath, so a bare POSIX
+          // path becomes drive-qualified on Windows. Expect the host-resolved form.
+          `Plan: create agent work with workspace ${path.resolve("/tmp/work")}${name ? `, name: ${JSON.stringify(name)}` : ""}${purpose ? `, purpose: ${JSON.stringify(purpose)}` : ""}${role ? ", role: Writer" : ""}. Reply /openclaw yes to apply.`,
         );
         expect(deps.createAgent).not.toHaveBeenCalled();
         await expect(runRescue("/openclaw yes", cfg, commandContext(), deps)).resolves.toContain(
